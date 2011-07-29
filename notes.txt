@@ -1,0 +1,8 @@
+Images:
+http://www.stereomerger.com/mw/index.php/File:Parallell-example.jpg
+http://www.stereomerger.com/mw/index.php/File:Crosseyed-example.jpg
+
+Anaglyphs with javascript:
+http://svay.com/blog/index/post/2009/04/03/Générer-des-anaglyphes-avec-javascript-et-canvas
+Trans: http://translate.google.com/translate?js=n&prev=_t&hl=en&ie=UTF-8&layout=2&eotf=1&sl=fr&tl=en&u=http%3A%2F%2Fsvay.com%2Fblog%2Findex%2Fpost%2F2009%2F04%2F03%2FG%C3%A9n%C3%A9rer-des-anaglyphes-avec-javascript-et-canvas
+http://svay.com/experiences/canvas-anaglyph/
