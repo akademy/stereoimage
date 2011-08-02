@@ -1,19 +1,61 @@
 <!DOCTYPE HTML>
 <html>
+<head>
+</head>
 <body>
 
 <canvas id="myCanvas" width="800" height="800" style="border:1px solid #c3c3c3;">
 Your browser does not support the canvas element.
 </canvas>
 
+<script type="text/javascript" src="imageloader.min.js"></script>
 <script type="text/javascript">
-
-var c=document.getElementById("myCanvas");
-var cxt=c.getContext("2d");
-var img=new Image();
-img.src="800px-Parallell-example.jps";
-cxt.drawImage(img,0,0);
-
+    var imageLoader = new ImageLoader( {
+        "images": [
+            { "name":"3dtest", file: "image.jps" },
+        ],
+        "onAllLoaded": function( ) {},
+        
+        "onImageLoaded": function( name, image ) {
+            
+            var width = image.width; 
+            var width_individual = image.width/2;
+            
+            var height = image.height;
+            
+            var c = document.getElementById("myCanvas");
+            var cxt = c.getContext("2d");
+            
+            var crop_x_left = 0, 
+                    crop_y_left = 0, 
+                    crop_width_left = width_individual, 
+                    crop_height_left = height,
+                    crop_x_right = width_individual, 
+                    crop_y_right = 0, 
+                    crop_width_right = width_individual, 
+                    crop_height_right = height;
+            
+            var show_left = true, show_right = true;
+            
+            var x_left = 0, 
+                    y_left = 0,
+                    width_left = width_individual,
+                    height_left = height,
+                    x_right = 0,
+                    y_right = height,
+                    width_right = width_individual,
+                    height_right = height;
+                    
+            if( show_left ) {
+                cxt.drawImage( image, crop_x_left, crop_y_left, crop_width_left, crop_height_left, 
+                                            x_left, y_left, width_left, height_left );
+            }
+            if( show_right ) {
+                cxt.drawImage( image, crop_x_right, crop_y_right, crop_width_right, crop_height_right, 
+                                            x_right, y_right, width_right, height_right );
+            }
+        }
+    } );
 </script>
 
 </body>
