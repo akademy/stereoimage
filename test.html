@@ -2,18 +2,77 @@
 <html>
 <body>
 
+
+<input type="button" onclick="bothHorizontal();" value="Horizontal" />
+<input type="button" onclick="bothVertical();" value="Vertical" />
+
+<input type="button" onclick="left();" value="Left" />
+<input type="button" onclick="right();" value="Right" />
+
+<input type="button" onclick="flick();" value="Flick" />
+<br/>
 <canvas id="myCanvas" width="800" height="800" style="border:1px solid #c3c3c3;">
 Your browser does not support the canvas element.
 </canvas>
 
 <script type="text/javascript">
 
+var flickTimer = null;
+var flickSpeed = 150;
+
 var c=document.getElementById("myCanvas");
 var cxt=c.getContext("2d");
 var img=new Image();
-img.src="800px-Parallell-example.jps";
-cxt.drawImage(img,0,0);
+img.src="image.jps";
 
+function clear() {
+	if( flickTimer != null ) {
+		clearTimeout( flickTimer );
+		flickTimer = null;
+	}
+	cxt.clearRect( 0,0, c.width, c.height );
+}
+
+function bothHorizontal() {
+	clear();
+
+	cxt.drawImage(img,0,0);
+}
+
+function bothVertical() {
+	clear();
+
+	cxt.drawImage(img,0,0,img.width/2,img.height,0,0,img.width/2,img.height);
+	cxt.drawImage(img,img.width/2,0,img.width,img.height,0,img.height,img.width/2,img.height);
+}
+
+function left() {
+	clear();
+	cxt.drawImage(img,0,0,img.width/2,img.height,0,0,img.width/2,img.height);
+}
+function right() {
+	clear();
+	cxt.drawImage(img,img.width/2,0,img.width/2,img.height,0,0,img.width/2,img.height);
+}
+
+function flick() {
+	clear();
+
+	var showingLeft = true;
+
+	flickTimer = setInterval( function() {
+		if( showingLeft ) {
+			cxt.drawImage(img,0,0,img.width/2,img.height,0,0,img.width/2,img.height);
+		}
+		else {
+			cxt.drawImage(img,img.width/2,0,img.width/2,img.height,0,0,img.width/2,img.height);
+		}
+		showingLeft = !showingLeft;
+	}, flickSpeed );
+
+}
+
+bothVertical();
 </script>
 
 </body>
