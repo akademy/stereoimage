@@ -4,123 +4,36 @@
 </head>
 <body>
 
+<script type="text/javascript">
+</script>
 
-<input type="button" onclick="bothHorizontal();" value="Horizontal" />
-<input type="button" onclick="bothVertical();" value="Vertical" />
+<input type="button" onclick="stereoImage.bothHorizontal();" value="Horizontal" />
+<input type="button" onclick="stereoImage.bothVertical();" value="Vertical" />
 
-<input type="button" onclick="left();" value="Left" />
-<input type="button" onclick="right();" value="Right" />
+<input type="button" onclick="stereoImage.left();" value="Left" />
+<input type="button" onclick="stereoImage.right();" value="Right" />
 
-<input type="button" onclick="flick();" value="Flick" />
+<input type="button" onclick="stereoImage.flick();" value="Flick" />
 <br/>
 <canvas id="myCanvas" width="800" height="800" style="border:1px solid #c3c3c3;">
 Your browser does not support the canvas element.
 </canvas>
 
 <script type="text/javascript" src="imageloader.min.js"></script>
+<script type="text/javascript" src="stereoimage.js"></script>
 <script type="text/javascript">
-var displayType = ['actual_size','size_to_canvas','size_to_canvas_with_aspect'];
-
-/* settings */
-var flickSpeed = 150;
-var fileName = "image.jps";
-var display = displayType[0];
-
-/* setup */
-var imgBoth=new Image();
-imgBoth.src=fileName;
-/* TODO: Wait for image to finish loading... (or use ImageLoader class) */
-            var height = image.height;
-            
-            var c = document.getElementById("myCanvas");
-            var cxt = c.getContext("2d");
-            
-var actualImageWidth = imgBoth.width / 2;
-var actualImageHeight = imgBoth.height;
-
-var flickTimer = null;
-
-function clear() {
-	if( flickTimer != null ) {
-		clearTimeout( flickTimer );
-		flickTimer = null;
-	}
-	cxt.clearRect( 0,0, c.width, c.height );
-}
-
-/* TODO: test sizing */
-function sizes( display ) {
-	switch( display ) {
-		case 'actual_size':
-		default:
-			return {
-				w : actualImageWidth,
-				h : actualImageHeight
-			};
-		case 'size_to_canvas':
-			return {
-				w : c.width,
-				h : c.height
-			};
-	   case 'size_to_canvas_with_aspect':
-			if( actualImageWidth > actualImageHeight ) {
-				// potrait
-				var scale = (c.width * 1.0) / actualImageWidth;
-				return {
-					w : actualImageWidth * scale,
-					h : actualImageHeight * scale
-				};
-			}
-			else {
-				var scale = (c.height * 1.0) / actualImageHeight;
-				return {
-					w : actualImageWidth * scale,
-					h : actualImageHeight * scale
-				};
-			}
-	}
-}
-
-function bothHorizontal() {
-	clear();
-
-	cxt.drawImage(imgBoth,0,0,imgBoth.width, imgBoth.height,0,0,actualImageWidth, actualImageHeight);
-}
-
-function bothVertical() {
-	clear();
-
-	cxt.drawImage(imgBoth,0,0,actualImageWidth,actualImageHeight,0,0,actualImageWidth,actualImageHeight/2);
-	cxt.drawImage(imgBoth,actualImageWidth,0,actualImageWidth,actualImageHeight,0,actualImageHeight/2,actualImageWidth,actualImageHeight/2);
-}
-
-function left() {
-	clear();
-	cxt.drawImage(imgBoth,0,0,imgBoth.width/2,imgBoth.height,0,0,imgBoth.width/2,imgBoth.height);
-}
-function right() {
-	clear();
-	cxt.drawImage(imgBoth,imgBoth.width/2,0,imgBoth.width/2,imgBoth.height,0,0,imgBoth.width/2,imgBoth.height);
-}
-
-function flick() {
-	clear();
-
-	var showingLeft = true;
-
-	flickTimer = setInterval( function() {
-		if( showingLeft ) {
-			cxt.drawImage(imgBoth,0,0,imgBoth.width/2,imgBoth.height,0,0,imgBoth.width/2,imgBoth.height);
-		}
-		else {
-			cxt.drawImage(imgBoth,imgBoth.width/2,0,imgBoth.width/2,imgBoth.height,0,0,imgBoth.width/2,imgBoth.height);
-		}
-		showingLeft = !showingLeft;
-	}, flickSpeed );
-
-}
-
-bothVertical();
+    var fileName = "image.jps";
+    var stereoImage = null;
+    
+    var imageLoader = new ImageLoader( {
+        "images": [
+            { "name":"3dtest", file: fileName },
+        ],
+        "onAllLoaded": function( ) {},
+        "onImageLoaded": function ( name, image ) {
+            stereoImage = new StereoImage( image );
+        }
+    });
 </script>
 
 </body>
