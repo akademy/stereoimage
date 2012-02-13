@@ -2,10 +2,12 @@ function StereoImage( image ) {
     var imgBoth = image;
     
     var displayType = ['actual_size','size_to_canvas','size_to_canvas_with_aspect'];
-
+    var drawType = ["bothHorizontal","bothVertical","left","right","flick"];
+    
     /* settings */
     var flickSpeed = 150;
-    var display = displayType[0];
+    var display = displayType[2];
+    var  drawing = drawType[2];
     
     var c = document.getElementById("myCanvas");
     var cxt = c.getContext("2d");
@@ -15,6 +17,23 @@ function StereoImage( image ) {
 
     var flickTimer = null;
     
+    var left;
+    
+    function callDrawing( that, drawing ) {
+        switch( drawing ) {
+            case( "bothHorizontal" ):
+                return  that.bothHorizontal();
+            case( "bothVertical" ):
+                return that.bothVertical();
+            case( "left" ):
+                return that.left();
+            case( "right" ):
+                return that.right();
+            case( "flick" ):
+                return that.flick();
+        }
+    }
+    
     function clear() {
         if( flickTimer != null ) {
             clearTimeout( flickTimer );
@@ -22,7 +41,7 @@ function StereoImage( image ) {
         }
         cxt.clearRect( 0,0, c.width, c.height );
     };
-
+    
     /* TODO: test sizing */
     function sizes( display ) {
         switch( display ) {
@@ -56,45 +75,67 @@ function StereoImage( image ) {
         }
     };
 
+    this.setSizing = function ( size ) {
+        if( size >= 0 && size < displayType.length )
+            display = displayType[size];
+        else
+            display = displayType[0];
+            
+        callDrawing( this, drawing );
+    }
+    
     this.bothHorizontal = function () {
+        drawing = "bothHorizontal";
         clear();
-
-        cxt.drawImage(imgBoth,0,0,imgBoth.width, imgBoth.height,0,0,actualImageWidth, actualImageHeight);
+        
+        var size = sizes( display );
+        cxt.drawImage(imgBoth,0,0,imgBoth.width, imgBoth.height,0,0,size.w, size.h );
     };
 
     this.bothVertical = function() {
+        drawing = "bothVertical";
         clear();
 
-        cxt.drawImage(imgBoth,0,0,actualImageWidth,actualImageHeight,0,0,actualImageWidth,actualImageHeight/2);
-        cxt.drawImage(imgBoth,actualImageWidth,0,actualImageWidth,actualImageHeight,0,actualImageHeight/2,actualImageWidth,actualImageHeight/2);
+        var size = sizes( display );
+        cxt.drawImage(imgBoth,0,0,actualImageWidth,actualImageHeight,0,0,size.w,size.h/2);
+        cxt.drawImage(imgBoth,actualImageWidth,0,actualImageWidth,actualImageHeight,0,size.h/2,size.w,size.h/2);
     };
 
     this.left = function() {
+        drawing = "left";
         clear();
-        cxt.drawImage(imgBoth,0,0,imgBoth.width/2,imgBoth.height,0,0,imgBoth.width/2,imgBoth.height);
+        var size = sizes( display );
+        cxt.drawImage(imgBoth,0,0,imgBoth.width/2,imgBoth.height,0,0,size.w,size.h);
     };
     this.right = function() {
+        drawing = "right";
         clear();
-        cxt.drawImage(imgBoth,imgBoth.width/2,0,imgBoth.width/2,imgBoth.height,0,0,imgBoth.width/2,imgBoth.height);
+        var size = sizes( display );
+        cxt.drawImage(imgBoth,imgBoth.width/2,0,imgBoth.width/2,imgBoth.height,0,0,size.w,size.h);
     };
 
     this.flick = function() {
+        drawing = "flick";
+        
         clear();
-
+        
+        var size = sizes( display );
         var showingLeft = true;
-        cxt.drawImage(imgBoth,imgBoth.width/2,0,imgBoth.width/2,imgBoth.height,0,0,imgBoth.width/2,imgBoth.height);
+        cxt.drawImage(imgBoth,imgBoth.width/2,0,imgBoth.width/2,imgBoth.height,0,0,size.w,size.h);
 
         flickTimer = setInterval( function() {
             if( showingLeft ) {
-                cxt.drawImage(imgBoth,0,0,imgBoth.width/2,imgBoth.height,0,0,imgBoth.width/2,imgBoth.height);
+                cxt.drawImage(imgBoth,0,0,imgBoth.width/2,imgBoth.height,0,0,size.w,size.h);
             }
             else {
-                cxt.drawImage(imgBoth,imgBoth.width/2,0,imgBoth.width/2,imgBoth.height,0,0,imgBoth.width/2,imgBoth.height);
+                cxt.drawImage(imgBoth,imgBoth.width/2,0,imgBoth.width/2,imgBoth.height,0,0,size.w,size.h);
             }
             showingLeft = !showingLeft;
         }, flickSpeed );
 
     };
+    
+    this.left();
 };
     
     
