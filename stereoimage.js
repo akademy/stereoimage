@@ -17,8 +17,6 @@ function StereoImage( image ) {
 
     var flickTimer = null;
     
-    var left;
-    
     function callDrawing( that, drawing ) {
         switch( drawing ) {
             case( "bothHorizontal" ):
@@ -74,7 +72,17 @@ function StereoImage( image ) {
                 }
         }
     };
-
+    
+    function drawLeft() {
+        var size = sizes( display );
+        cxt.drawImage(imgBoth,0,0,imgBoth.width/2,imgBoth.height,0,0,size.w,size.h);
+    }
+    
+    function drawRight() {
+        var size = sizes( display );
+        cxt.drawImage(imgBoth,imgBoth.width/2,0,imgBoth.width/2,imgBoth.height,0,0,size.w,size.h);
+    }
+    
     this.setSizing = function ( size ) {
         if( size >= 0 && size < displayType.length )
             display = displayType[size];
@@ -104,14 +112,14 @@ function StereoImage( image ) {
     this.left = function() {
         drawing = "left";
         clear();
-        var size = sizes( display );
-        cxt.drawImage(imgBoth,0,0,imgBoth.width/2,imgBoth.height,0,0,size.w,size.h);
+        
+        drawLeft();
     };
     this.right = function() {
         drawing = "right";
         clear();
-        var size = sizes( display );
-        cxt.drawImage(imgBoth,imgBoth.width/2,0,imgBoth.width/2,imgBoth.height,0,0,size.w,size.h);
+        
+        drawRight();
     };
 
     this.flick = function() {
@@ -121,14 +129,14 @@ function StereoImage( image ) {
         
         var size = sizes( display );
         var showingLeft = true;
-        cxt.drawImage(imgBoth,imgBoth.width/2,0,imgBoth.width/2,imgBoth.height,0,0,size.w,size.h);
+        drawRight();
 
         flickTimer = setInterval( function() {
             if( showingLeft ) {
-                cxt.drawImage(imgBoth,0,0,imgBoth.width/2,imgBoth.height,0,0,size.w,size.h);
+                drawLeft();
             }
             else {
-                cxt.drawImage(imgBoth,imgBoth.width/2,0,imgBoth.width/2,imgBoth.height,0,0,size.w,size.h);
+                drawRight();
             }
             showingLeft = !showingLeft;
         }, flickSpeed );
