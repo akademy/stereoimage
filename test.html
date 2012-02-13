@@ -16,14 +16,25 @@ Your browser does not support the canvas element.
 </canvas>
 
 <script type="text/javascript">
+var displayType = ['actual_size','size_to_canvas','size_to_canvas_with_aspect'];
 
-var flickTimer = null;
+/* settings */
 var flickSpeed = 150;
+var fileName = "image.jps";
+var display = displayType[0];
+
+/* setup */
+var imgBoth=new Image();
+imgBoth.src=fileName;
+/* TODO: Wait for image to finish loading... (or use ImageLoader class) */
 
 var c=document.getElementById("myCanvas");
 var cxt=c.getContext("2d");
-var img=new Image();
-img.src="image.jps";
+
+var actualImageWidth = imgBoth.width / 2;
+var actualImageHeight = imgBoth.height;
+
+var flickTimer = null;
 
 function clear() {
 	if( flickTimer != null ) {
@@ -33,26 +44,59 @@ function clear() {
 	cxt.clearRect( 0,0, c.width, c.height );
 }
 
+/* TODO: test sizing */
+function sizes( display ) {
+	switch( display ) {
+		case 'actual_size':
+		default:
+			return {
+				w : actualImageWidth,
+				h : actualImageHeight
+			};
+		case 'size_to_canvas':
+			return {
+				w : c.width,
+				h : c.height
+			};
+	   case 'size_to_canvas_with_aspect':
+			if( actualImageWidth > actualImageHeight ) {
+				// potrait
+				var scale = (c.width * 1.0) / actualImageWidth;
+				return {
+					w : actualImageWidth * scale,
+					h : actualImageHeight * scale
+				};
+			}
+			else {
+				var scale = (c.height * 1.0) / actualImageHeight;
+				return {
+					w : actualImageWidth * scale,
+					h : actualImageHeight * scale
+				};
+			}
+	}
+}
+
 function bothHorizontal() {
 	clear();
 
-	cxt.drawImage(img,0,0);
+	cxt.drawImage(imgBoth,0,0,imgBoth.width, imgBoth.height,0,0,actualImageWidth, actualImageHeight);
 }
 
 function bothVertical() {
 	clear();
 
-	cxt.drawImage(img,0,0,img.width/2,img.height,0,0,img.width/2,img.height);
-	cxt.drawImage(img,img.width/2,0,img.width,img.height,0,img.height,img.width/2,img.height);
+	cxt.drawImage(imgBoth,0,0,actualImageWidth,actualImageHeight,0,0,actualImageWidth,actualImageHeight/2);
+	cxt.drawImage(imgBoth,actualImageWidth,0,actualImageWidth,actualImageHeight,0,actualImageHeight/2,actualImageWidth,actualImageHeight/2);
 }
 
 function left() {
 	clear();
-	cxt.drawImage(img,0,0,img.width/2,img.height,0,0,img.width/2,img.height);
+	cxt.drawImage(imgBoth,0,0,imgBoth.width/2,imgBoth.height,0,0,imgBoth.width/2,imgBoth.height);
 }
 function right() {
 	clear();
-	cxt.drawImage(img,img.width/2,0,img.width/2,img.height,0,0,img.width/2,img.height);
+	cxt.drawImage(imgBoth,imgBoth.width/2,0,imgBoth.width/2,imgBoth.height,0,0,imgBoth.width/2,imgBoth.height);
 }
 
 function flick() {
@@ -62,10 +106,10 @@ function flick() {
 
 	flickTimer = setInterval( function() {
 		if( showingLeft ) {
-			cxt.drawImage(img,0,0,img.width/2,img.height,0,0,img.width/2,img.height);
+			cxt.drawImage(imgBoth,0,0,imgBoth.width/2,imgBoth.height,0,0,imgBoth.width/2,imgBoth.height);
 		}
 		else {
-			cxt.drawImage(img,img.width/2,0,img.width/2,img.height,0,0,img.width/2,img.height);
+			cxt.drawImage(imgBoth,imgBoth.width/2,0,imgBoth.width/2,imgBoth.height,0,0,imgBoth.width/2,imgBoth.height);
 		}
 		showingLeft = !showingLeft;
 	}, flickSpeed );
