@@ -2,15 +2,15 @@ function StereoImage( image ) {
     var imgBoth = image;
     
     var displayType = ['actual_size','size_to_canvas','size_to_canvas_with_aspect'];
-    var drawType = ["bothHorizontal","bothVertical","left","right","flick"];
+    var drawType = ["bothHorizontal","bothVertical","left","right","flick","stereoscopic"];
     
     /* settings */
     var flickSpeed = 150;
-    var display = displayType[2];
-    var  drawing = drawType[2];
+    var _display = displayType[0];
+    var  _drawing = drawType[5];
     
     var c = document.getElementById("myCanvas");
-    var cxt = c.getContext("2d");
+    var ctx = c.getContext("2d");
                 
     var actualImageWidth = imgBoth.width / 2;
     var actualImageHeight = imgBoth.height;
@@ -29,6 +29,10 @@ function StereoImage( image ) {
                 return that.right();
             case( "flick" ):
                 return that.flick();
+            case( "stereoscopic" ):
+                return that.stereoscopic();
+            default:
+                alert("Missing _drawing");
         }
     }
     
@@ -37,7 +41,7 @@ function StereoImage( image ) {
             clearTimeout( flickTimer );
             flickTimer = null;
         }
-        cxt.clearRect( 0,0, c.width, c.height );
+        ctx.clearRect( 0,0, c.width, c.height );
     };
     
     /* TODO: test sizing */
@@ -55,79 +59,75 @@ function StereoImage( image ) {
                     h : c.height
                 };
            case 'size_to_canvas_with_aspect':
-                if( actualImageWidth > actualImageHeight ) {
-                    // potrait
-                    var scale = (c.width * 1.0) / actualImageWidth;
-                    return {
-                        w : actualImageWidth * scale,
-                        h : actualImageHeight * scale
-                    };
+                var scale = 1;
+                if( actualImageWidth > actualImageHeight ) { // potrait
+                    scale = (c.width * 1.0) / actualImageWidth;
                 }
                 else {
-                    var scale = (c.height * 1.0) / actualImageHeight;
-                    return {
-                        w : actualImageWidth * scale,
-                        h : actualImageHeight * scale
-                    };
+                    scale = (c.height * 1.0) / actualImageHeight;
                 }
+                return {
+                    w : actualImageWidth * scale,
+                    h : actualImageHeight * scale
+                };
         }
     };
     
     function drawLeft() {
-        var size = sizes( display );
-        cxt.drawImage(imgBoth,0,0,imgBoth.width/2,imgBoth.height,0,0,size.w,size.h);
+        var size = sizes( _display );
+        ctx.drawImage(imgBoth,0,0,imgBoth.width/2,imgBoth.height,0,0,size.w,size.h);
     }
     
     function drawRight() {
-        var size = sizes( display );
-        cxt.drawImage(imgBoth,imgBoth.width/2,0,imgBoth.width/2,imgBoth.height,0,0,size.w,size.h);
+        var size = sizes( _display );
+        ctx.drawImage(imgBoth,imgBoth.width/2,0,imgBoth.width/2,imgBoth.height,0,0,size.w,size.h);
     }
     
     this.setSizing = function ( size ) {
         if( size >= 0 && size < displayType.length )
-            display = displayType[size];
+            _display = displayType[size];
         else
-            display = displayType[0];
+            _display = displayType[0];
             
-        callDrawing( this, drawing );
+        callDrawing( this, _drawing );
     }
     
     this.bothHorizontal = function () {
-        drawing = "bothHorizontal";
+        _drawing = "bothHorizontal";
         clear();
         
-        var size = sizes( display );
-        cxt.drawImage(imgBoth,0,0,imgBoth.width, imgBoth.height,0,0,size.w, size.h );
+        var size = sizes( _display );
+        ctx.drawImage(imgBoth,0,0,imgBoth.width, imgBoth.height,0,0,size.w, size.h );
     };
 
     this.bothVertical = function() {
-        drawing = "bothVertical";
+        _drawing = "bothVertical";
         clear();
 
-        var size = sizes( display );
-        cxt.drawImage(imgBoth,0,0,actualImageWidth,actualImageHeight,0,0,size.w,size.h/2);
-        cxt.drawImage(imgBoth,actualImageWidth,0,actualImageWidth,actualImageHeight,0,size.h/2,size.w,size.h/2);
+        var size = sizes( _display );
+        ctx.drawImage(imgBoth,0,0,actualImageWidth,actualImageHeight,0,0,size.w,size.h/2);
+        ctx.drawImage(imgBoth,actualImageWidth,0,actualImageWidth,actualImageHeight,0,size.h/2,size.w,size.h/2);
     };
 
     this.left = function() {
-        drawing = "left";
+        _drawing = "left";
         clear();
         
         drawLeft();
     };
     this.right = function() {
-        drawing = "right";
+        _drawing = "right";
         clear();
         
         drawRight();
     };
 
     this.flick = function() {
-        drawing = "flick";
+        _drawing = "flick";
         
         clear();
         
-        var size = sizes( display );
+        var size = sizes( _display );
         var showingLeft = true;
         drawRight();
 
@@ -143,7 +143,36 @@ function StereoImage( image ) {
 
     };
     
-    this.left();
+    this.stereoscopic = function() {
+        _drawing = "stereoscopic";
+        
+        // TODO 
+        
+        var size = sizes( _display );
+        
+        var dotRadius = 3;
+        var dotPosY = dotRadius*3;
+        var imagePosY = dotPosY * 2;
+        
+        size.h -= imagePosY;
+        
+        clear();
+        
+        // Overright height for this setting so that the aspect is always right.
+        var scale = (size.w*1.0) / imgBoth.width;
+        size.h = imgBoth.height * scale;
+        
+        // Helper to align eyes
+        ctx.fillStyle="black";
+        ctx.beginPath();
+        ctx.arc(size.w/4,dotPosY,dotRadius,0,Math.PI*2, true);
+        ctx.arc(size.w*3/4,dotPosY,dotRadius,0,Math.PI*2, true);
+        ctx.fill();
+        
+        ctx.drawImage(imgBoth,0,0,imgBoth.width, imgBoth.height,0,imagePosY,size.w, size.h );
+    }
+    
+    callDrawing( this, _drawing );
 };
     
     
