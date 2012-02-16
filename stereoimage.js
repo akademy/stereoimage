@@ -1,23 +1,64 @@
-function StereoImage( image ) {
-    var imgBoth = image;
+function StereoImage( settings ) {
+	var UNDEFINED = undefined,  // I guess I could just not define this...!
+			NULL = null,
+			FALSE = false,
+			TRUE = true;
+			
+	var _setup = FALSE;
+			
+	var _imageName = "3DIMAGE";
+	var _imageLoader = new ImageLoader( {
+        "images": [
+            { "name":_imageName, file: settings.filename },
+        ],
+        "onAllLoaded": function() { imageLoaded(); },
+        "onImageLoaded": function ( name, image ) {}
+    });
     
-    var displayType = ['actual_size','size_to_canvas','size_to_canvas_with_aspect'];
-    var drawType = ["bothHorizontal","bothVertical","left","right","flick","stereoscopic","anaglyph"];
+	var displayType = ['actual_size','size_to_canvas','size_to_canvas_with_aspect'];
+	var drawType = ["bothHorizontal","bothVertical","left","right","flick","stereoscopic","anaglyph"];
+    
+    var _imgBoth = NULL;
     
     /* settings */
-    var flickSpeed = 150;
-    var _display = displayType[0];
-    var  _drawing = drawType[3];
+    var _flickSpeed = (settings['flick-rate'] !== UNDEFINED ) ? settings['flick-rate'] : 150;
+    var _display = (settings['default-display-type'] !== UNDEFINED ) ? displayType[settings['default-display-type']] : displayType[2];
+    var _drawing = (settings['default-draw-type'] !== UNDEFINED ) ? drawType[settings['default-draw-type']] : drawType[3];
+    var _stereoscopicScale = (settings['stereoscopic-scale'] !== UNDEFINED ) ? settings['stereoscopic-scale'] : 1.0;
     
-    var c = document.getElementById("myCanvas");
-    var ctx = c.getContext("2d");
-                
-    var actualImageWidth = imgBoth.width / 2;
-    var actualImageHeight = imgBoth.height;
+    var _canvas = settings['canvas'];
+    if( _canvas === UNDEFINED && settings['canvas-id'] !== UNDEFINED )
+    	_canvas = document.getElementById("myCanvas");
+    
+	 if( _canvas === UNDEFINED || _canvas === NULL ) {
+		 return;
+	 }
+	
+	 // Finish setup.
+    var _ctx = _canvas.getContext("2d");
+    
+    var _actualImageWidth = 0,
+    		_actualImageHeight = 0;
+    
+    var flickTimer = NULL;
+     
+    var that = this;
+    
+    _setup = TRUE;
+    
+    function imageLoaded() {
+    	_imgBoth = _imageLoader.getImageByName( _imageName );
+    	
+    	_actualImageWidth = _imgBoth.width / 2;
+    	_actualImageHeight = _imgBoth.height;
+    	
+    	_setup = TRUE;
+    	
+    	callDrawing( _drawing );
+    }
 
-    var flickTimer = null;
     
-    function callDrawing( that, drawing ) {
+    function callDrawing( drawing ) {
         switch( drawing ) {
             case( "bothHorizontal" ):
                 return  that.bothHorizontal();
@@ -34,69 +75,88 @@ function StereoImage( image ) {
             case( "anaglyph" ):
                 return that.anaglyph();
             default:
-                alert("Missing _drawing");
+                return alert("Missing _drawing");
         }
     }
     
     function clear() {
-        if( flickTimer != null ) {
+        if( flickTimer != NULL ) {
             clearTimeout( flickTimer );
-            flickTimer = null;
+            flickTimer = NULL;
         }
-        ctx.clearRect( 0,0, c.width, c.height );
+        _ctx.clearRect( 0,0, _canvas.width, _canvas.height );
     };
     
-    /* TODO: test sizing */
     function sizes( display ) {
         switch( display ) {
             case 'actual_size':
-            default:
                 return {
-                    w : actualImageWidth,
-                    h : actualImageHeight
+                    w : _actualImageWidth,
+                    h : _actualImageHeight
                 };
             case 'size_to_canvas':
                 return {
-                    w : c.width,
-                    h : c.height
+                    w : _canvas.width,
+                    h : _canvas.height
                 };
            case 'size_to_canvas_with_aspect':
                 var scale = 1;
-                if( actualImageWidth > actualImageHeight ) { // potrait
-                    scale = (c.width * 1.0) / actualImageWidth;
+                if( _actualImageWidth > _actualImageHeight ) { // potrait
+                    scale = (_canvas.width * 1.0) / _actualImageWidth;
                 }
                 else {
-                    scale = (c.height * 1.0) / actualImageHeight;
+                    scale = (_canvas.height * 1.0) / _actualImageHeight;
                 }
                 return {
-                    w : actualImageWidth * scale,
-                    h : actualImageHeight * scale
+                    w : _actualImageWidth * scale,
+                    h : _actualImageHeight * scale
                 };
+           default:
+                return alert("Missing _display");
+           	
         }
     };
     
     function drawLeft(context) {
         var size = sizes( _display );
-        if( context === undefined )
-            context = ctx;
+        if( context === UNDEFINED )
+            context = _ctx;
             
-        context.drawImage(imgBoth,0,0,imgBoth.width/2,imgBoth.height,0,0,size.w,size.h);
+        context.drawImage(_imgBoth,0,0,_imgBoth.width/2,_imgBoth.height,0,0,size.w,size.h);
     };
     
     function drawRight(context) {
         var size = sizes( _display );
-        if( context === undefined )
-            context = ctx;
-        context.drawImage(imgBoth,imgBoth.width/2,0,imgBoth.width/2,imgBoth.height,0,0,size.w,size.h);
+        if( context === UNDEFINED )
+            context = _ctx;
+        context.drawImage(_imgBoth,_imgBoth.width/2,0,_imgBoth.width/2,_imgBoth.height,0,0,size.w,size.h);
     };
     
+    this.setFlickRate = function( flickRate ) {
+    	if( flickRate > 0 ) {
+		 	_flickSpeed = flickRate;
+		 	
+		 	if( _drawing === "flick" )
+		 		callDrawing( _drawing );
+    	}
+    }
+    
+    this.setStereoscopicScale = function( stereoscopicScale ) {
+    	if( stereoscopicScale > 0.0 && stereoscopicScale <= 1.0 ) {
+		 	_stereoscopicScale = stereoscopicScale;
+		 	
+		 	if( _drawing === "stereoscopic" )
+		 		callDrawing( _drawing );
+    	}
+    }
+        
     this.setSizing = function ( size ) {
         if( size >= 0 && size < displayType.length )
             _display = displayType[size];
         else
             _display = displayType[0];
             
-        callDrawing( this, _drawing );
+        callDrawing( _drawing );
     }
     
     this.bothHorizontal = function () {
@@ -104,7 +164,7 @@ function StereoImage( image ) {
         clear();
         
         var size = sizes( _display );
-        ctx.drawImage(imgBoth,0,0,imgBoth.width, imgBoth.height,0,0,size.w, size.h );
+        _ctx.drawImage(_imgBoth,0,0,_imgBoth.width, _imgBoth.height,0,0,size.w, size.h );
     };
 
     this.bothVertical = function() {
@@ -112,8 +172,8 @@ function StereoImage( image ) {
         clear();
 
         var size = sizes( _display );
-        ctx.drawImage(imgBoth,0,0,actualImageWidth,actualImageHeight,0,0,size.w,size.h/2);
-        ctx.drawImage(imgBoth,actualImageWidth,0,actualImageWidth,actualImageHeight,0,size.h/2,size.w,size.h/2);
+        _ctx.drawImage(_imgBoth,0,0,_actualImageWidth,_actualImageHeight,0,0,size.w,size.h/2);
+        _ctx.drawImage(_imgBoth,_actualImageWidth,0,_actualImageWidth,_actualImageHeight,0,size.h/2,size.w,size.h/2);
     };
 
     this.left = function() {
@@ -135,7 +195,7 @@ function StereoImage( image ) {
         clear();
         
         var size = sizes( _display );
-        var showingLeft = true;
+        var showingLeft = TRUE;
         drawRight();
 
         flickTimer = setInterval( function() {
@@ -146,14 +206,14 @@ function StereoImage( image ) {
                 drawRight();
             }
             showingLeft = !showingLeft;
-        }, flickSpeed );
+        }, _flickSpeed );
 
     };
     
     this.stereoscopic = function() {
         _drawing = "stereoscopic";
         
-        // TODO: reduce image size for easier combination, may also crop image and possibly scroll...
+        // TODO: crop image and possibly scroll to make combining easier...
         
         var size = sizes( _display );
         
@@ -163,57 +223,62 @@ function StereoImage( image ) {
         
         size.h -= imagePosY;
         
+        size.w *= _stereoscopicScale;
+        
+        // Overwrite height for this setting so that the aspect is always correct.
+        var scale = (size.w*1.0) / _imgBoth.width;
+        size.h = _imgBoth.height * scale;
+                
         clear();
         
-        // Overright height for this setting so that the aspect is always correct.
-        var scale = (size.w*1.0) / imgBoth.width;
-        size.h = imgBoth.height * scale;
+        // Helper to align images with eyes
+        _ctx.fillStyle="black";
+        _ctx.beginPath();
+        _ctx.arc(size.w/4,dotPosY,dotRadius,0,Math.PI*2, TRUE);
+        _ctx.arc(size.w*3/4,dotPosY,dotRadius,0,Math.PI*2, TRUE);
+        _ctx.fill();
         
-        // Helper to align eyes
-        ctx.fillStyle="black";
-        ctx.beginPath();
-        ctx.arc(size.w/4,dotPosY,dotRadius,0,Math.PI*2, true);
-        ctx.arc(size.w*3/4,dotPosY,dotRadius,0,Math.PI*2, true);
-        ctx.fill();
-        
-        ctx.drawImage(imgBoth,0,0,imgBoth.width, imgBoth.height,0,imagePosY,size.w, size.h );
+        _ctx.drawImage(_imgBoth,0,0,_imgBoth.width, _imgBoth.height,0,imagePosY,size.w, size.h );
     }
     
     this.anaglyph = function() {
-        _drawing = "anaglyph";
+        //http://axon.physik.uni-bremen.de/research/stereo/color_anaglyph/
         
-        // TODO: reduce image size for easier combination, may also crop image and possibly scroll...
+        _drawing = "anaglyph";
         
         var size = sizes( _display );
         
-        var leftBuffer = document.createElement('canvas');
-        var rightBuffer = document.createElement('canvas');
+        var buffer = document.createElement('canvas');
+        buffer.width = size.w;
+        buffer.height = size.h;
         
-        leftBuffer.width =  rightBuffer.width = size.w;//actualImageWidth;
-        leftBuffer.height = rightBuffer.height = size.h;//actualImageHeight;
+        var ctxBuffer = buffer.getContext("2d");
         
-        var ctxLeft = leftBuffer.getContext("2d");
-        var ctxRight = rightBuffer.getContext("2d");
+        drawLeft( ctxBuffer );
+        var red = ctxBuffer.getImageData( 0,0, size.w, size.h);
         
-        drawLeft( ctxLeft );
-        drawRight( ctxRight );
+        drawRight( ctxBuffer );
+        var greenblue = ctxBuffer.getImageData( 0,0, size.w, size.h);
         
-        //http://axon.physik.uni-bremen.de/research/stereo/color_anaglyph/
-        red = ctxLeft.getImageData( 0,0, size.w, size.h);
-        greenblue = ctxLeft.getImageData( 0,0, size.w, size.h);
-        
-        for( var h=0;h<greenblue.height;h++) {
-            for( var w=0; w < greenblue.width;w++ ) {
-                greenblue.data[(h*greenblue.width + w ) * 4 + 0] = 0;
+        var dataWidth = greenblue.width,
+            dataHeight = greenblue.height,
+            h_line = 0,
+            pos = 0, 
+            h=0, w=0;
+            
+        for( ; h < dataHeight; h++ ) {
+        		h_line = h * dataWidth;
+            for( w=0; w < dataWidth; w++ ) {
+            	pos = ( h_line + w ) * 4;
+               greenblue.data[pos] = red.data[pos];
             }
         }
         
-        ctx.putImageData( greenblue,0,0);
+        clear();
+        _ctx.putImageData( greenblue, 0, 0 );
+        
     };
-    
-    callDrawing( this, _drawing );
 };
-    
     
 StereoImage.prototype.toString = function() {
     return "StereoImage class";

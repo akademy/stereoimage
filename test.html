@@ -7,40 +7,47 @@
 <script type="text/javascript">
 </script>
 
-<input type="button" onclick="stereoImage.bothHorizontal();" value="Horizontal" />
-<input type="button" onclick="stereoImage.bothVertical();" value="Vertical" />
+<input type="button" onclick="stereoImage.bothHorizontal();" value="Draw: Horizontal" />
+<input type="button" onclick="stereoImage.bothVertical();" value="Draw: Vertical" />
 
-<input type="button" onclick="stereoImage.left();" value="Left" />
-<input type="button" onclick="stereoImage.right();" value="Right" />
+<input type="button" onclick="stereoImage.left();" value="Draw: Left" />
+<input type="button" onclick="stereoImage.right();" value="Draw: Right" />
 
-<input type="button" onclick="stereoImage.flick();" value="Flick" />
+<input type="button" onclick="stereoImage.flick();" value="Draw: Flick" />
 
-<input type="button" onclick="stereoImage.stereoscopic();" value="Stereoscopic" />
-<input type="button" onclick="stereoImage.anaglyph();" value="Anaglyph" />
+<input type="button" onclick="stereoImage.stereoscopic();" value="Draw: Stereoscopic" />
+<input type="button" onclick="stereoImage.anaglyph();" value="Draw: Anaglyph" />
+ 
 <br/>
+<input id="stereoscopicScale" type="text" value="0.45" />
+<input type="button" onclick="stereoImage.setStereoscopicScale(document.getElementById('stereoscopicScale').value);" value="Set Stereoscopic Scale" />
+<br/>
+<input id="flickRate" type="text" value="280" />
+<input type="button" onclick="stereoImage.setFlickRate(document.getElementById('flickRate').value);" value="Set Flick Rate" />
+<br/>
+
 <input type="button" onclick="stereoImage.setSizing(0);" value="Sizing: full" />
 <input type="button" onclick="stereoImage.setSizing(1);" value="Sizing: fill" />
 <input type="button" onclick="stereoImage.setSizing(2);" value="Sizing: aspect fill" />
 <br/>
-<canvas id="myCanvas" width="800" height="800" style="border:1px solid #c3c3c3;">
+<canvas id="myCanvas" width="800" height="700" style="border:1px solid #c3c3c3;">
 Your browser does not support the canvas element.
 </canvas>
 
 <script type="text/javascript" src="imageloader.min.js"></script>
 <script type="text/javascript" src="stereoimage.js"></script>
 <script type="text/javascript">
-    var fileName = "image.jps";
-    var stereoImage = null;
-    
-    var imageLoader = new ImageLoader( {
-        "images": [
-            { "name":"3dtest", file: fileName },
-        ],
-        "onAllLoaded": function( ) {},
-        "onImageLoaded": function ( name, image ) {
-            stereoImage = new StereoImage( image );
-        }
-    });
+	var settings = {
+		'filename' : 'test-image.jps',
+		'canvas-id' : "myCanvas",
+		'stereoscopic-scale' : 0.45,
+		'flick-rate' : 280,
+		'default-display-type' : 2,
+		'default-draw-type' : 6
+		}
+	
+	var stereoImage = new StereoImage( settings );
+
 </script>
 
 </body>
