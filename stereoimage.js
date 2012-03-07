@@ -1,22 +1,49 @@
+/*
+The MIT License
+
+Copyright (c) 2012 Matthew Wilcoxson (www.akademy.co.uk)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+*/
+/*
+StereoImage
+By Matthew Wilcoxson
+
+Description:    Show JPS and PNS stereoscopic images inside a canvas. It can show the image in several different ways.
+Website:        http://www.akademy.co.uk/software/stereoimage/
+Version:        1.0.0.120307
+
+global ImageLoader, window  (for JSLint) 
+*/
 function StereoImage( settings ) {
 	var UNDEFINED = undefined,  // I guess I could just not define this...!
 			NULL = null,
 			FALSE = false,
-			TRUE = true;
+			TRUE = true; // For minify
 			
 	var _setup = FALSE;
 			
 	var _imageName = "3DIMAGE";
-	var _imageLoader = new ImageLoader( {
-        "images": [
-            { "name":_imageName, file: settings.filename },
-        ],
-        "onAllLoaded": function() { imageLoaded(); },
-        "onImageLoaded": function ( name, image ) {}
-    });
+
     
-	var displayType = ['actual_size','size_to_canvas','size_to_canvas_with_aspect'];
-	var drawType = ["bothHorizontal","bothVertical","left","right","flick","stereoscopic","anaglyph"];
+	var displayType = ['actual_size','size_to_canvas','size_to_canvas_with_aspect']; // TODO: Minify (i.e remove strings)
+	var drawType = ["bothHorizontal","bothVertical","left","right","flick","stereoscopic","anaglyph"]; // TODO: Minify (i.e remove strings)
     
     var _imgBoth = NULL;
     
@@ -27,8 +54,9 @@ function StereoImage( settings ) {
     var _stereoscopicScale = (settings['stereoscopic-scale'] !== UNDEFINED ) ? settings['stereoscopic-scale'] : 1.0;
     
     var _canvas = settings['canvas'];
-    if( _canvas === UNDEFINED && settings['canvas-id'] !== UNDEFINED )
+    if( _canvas === UNDEFINED && settings['canvas-id'] !== UNDEFINED ) {
     	_canvas = document.getElementById("myCanvas");
+    }
     
 	 if( _canvas === UNDEFINED || _canvas === NULL ) {
 		 return;
@@ -46,17 +74,6 @@ function StereoImage( settings ) {
     
     _setup = TRUE;
     
-    function imageLoaded() {
-    	_imgBoth = _imageLoader.getImageByName( _imageName );
-    	
-    	_actualImageWidth = _imgBoth.width / 2;
-    	_actualImageHeight = _imgBoth.height;
-    	
-    	_setup = TRUE;
-    	
-    	callDrawing( _drawing );
-    }
-
     
     function callDrawing( drawing ) {
         switch( drawing ) {
@@ -79,13 +96,34 @@ function StereoImage( settings ) {
         }
     }
     
+    var _imageLoader = NULL;
+    
+    function imageLoaded() {
+    	_imgBoth = _imageLoader.getImageByName( _imageName );
+    	
+    	_actualImageWidth = _imgBoth.width / 2;
+    	_actualImageHeight = _imgBoth.height;
+    	
+    	_setup = TRUE;
+    	
+    	callDrawing( _drawing );
+    }
+        
+	_imageLoader = new ImageLoader( {
+        "images": [
+            { "name":_imageName, file: settings.filename }
+        ],
+        "onAllLoaded": function() { imageLoaded(); },
+        "onImageLoaded": function ( name, image ) {}
+    });
+    
     function clear() {
-        if( flickTimer != NULL ) {
+        if( flickTimer !== NULL ) {
             clearTimeout( flickTimer );
             flickTimer = NULL;
         }
         _ctx.clearRect( 0,0, _canvas.width, _canvas.height );
-    };
+    }
     
     function sizes( display ) {
         switch( display ) {
@@ -115,49 +153,55 @@ function StereoImage( settings ) {
                 return alert("Missing _display");
            	
         }
-    };
+    }
     
     function drawLeft(context) {
         var size = sizes( _display );
-        if( context === UNDEFINED )
+        if( context === UNDEFINED ) {
             context = _ctx;
+        }
             
         context.drawImage(_imgBoth,0,0,_imgBoth.width/2,_imgBoth.height,0,0,size.w,size.h);
-    };
+    }
     
     function drawRight(context) {
         var size = sizes( _display );
-        if( context === UNDEFINED )
+        if( context === UNDEFINED ) {
             context = _ctx;
+        }
         context.drawImage(_imgBoth,_imgBoth.width/2,0,_imgBoth.width/2,_imgBoth.height,0,0,size.w,size.h);
-    };
+    }
     
     this.setFlickRate = function( flickRate ) {
     	if( flickRate > 0 ) {
 		 	_flickSpeed = flickRate;
 		 	
-		 	if( _drawing === "flick" )
+		 	if( _drawing === "flick" ) {
 		 		callDrawing( _drawing );
+		   }
     	}
-    }
+    };
     
     this.setStereoscopicScale = function( stereoscopicScale ) {
     	if( stereoscopicScale > 0.0 && stereoscopicScale <= 1.0 ) {
 		 	_stereoscopicScale = stereoscopicScale;
 		 	
-		 	if( _drawing === "stereoscopic" )
+		 	if( _drawing === "stereoscopic" ) {
 		 		callDrawing( _drawing );
+		   }
     	}
-    }
+    };
         
     this.setSizing = function ( size ) {
-        if( size >= 0 && size < displayType.length )
+        if( size >= 0 && size < displayType.length ) {
             _display = displayType[size];
-        else
+        }
+        else {
             _display = displayType[0];
+        }
             
         callDrawing( _drawing );
-    }
+    };
     
     this.bothHorizontal = function () {
         _drawing = "bothHorizontal";
@@ -239,7 +283,7 @@ function StereoImage( settings ) {
         _ctx.fill();
         
         _ctx.drawImage(_imgBoth,0,0,_imgBoth.width, _imgBoth.height,0,imagePosY,size.w, size.h );
-    }
+    };
     
     this.anaglyph = function() {
         //http://axon.physik.uni-bremen.de/research/stereo/color_anaglyph/
