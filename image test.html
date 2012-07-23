@@ -1,0 +1,65 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+</head>
+<body>
+
+<h1>StereoImage</h1>
+
+<style>
+input[type=image] {
+	border: 5px solid #fee;
+	border-radius: 5px;
+}
+input[type=image]:hover {
+	border: 5px solid #f00;
+}
+</style>
+
+<input type="image" src="images/button-horizontal.png" onclick="stereoImage.bothHorizontal();" value="Draw: Horizontal" width="50" height="50" />
+<input type="image" src="images/button-vertical.png" onclick="stereoImage.bothVertical();" value="Draw: Vertical" width="50" height="50" />
+
+<input type="image" src="images/button-left.png" onclick="stereoImage.left();" value="Draw: Left" width="50" height="50" />
+<input type="image" src="images/button-right.png" onclick="stereoImage.right();" value="Draw: Right" width="50" height="50" />
+
+<input type="image" src="images/button-flick.png" onclick="stereoImage.flick();" value="Draw: Flick" width="50" height="50" />
+
+<input type="image" src="images/button-stereoscopic.png" onclick="stereoImage.stereoscopic();" value="Draw: Stereoscopic" width="50" height="50" />
+<input type="image" src="images/button-anaglyph.png" onclick="stereoImage.anaglyph();" value="Draw: Anaglyph" width="50" height="50" />
+ 
+<br/>
+<input id="stereoscopicScale" type="text" value="0.45" />
+<input type="button" onclick="stereoImage.setStereoscopicScale(document.getElementById('stereoscopicScale').value);" value="Set Stereoscopic Scale" />
+<!--<br/>-->
+<input id="flickRate" type="text" value="280" />
+<input type="button" onclick="stereoImage.setFlickRate(document.getElementById('flickRate').value);" value="Set Flick Rate" />
+<!--<br/>
+
+
+<input type="button" onclick="stereoImage.setSizing(0);" value="Sizing: full" />
+<input type="button" onclick="stereoImage.setSizing(1);" value="Sizing: fill" />
+<input type="button" onclick="stereoImage.setSizing(2);" value="Sizing: aspect fill" />
+<br/>
+-->
+<canvas id="myCanvas" width="800" height="700" style="border:1px solid #c3c3c3;">
+Your browser does not support the canvas element.
+</canvas>
+
+<script type="text/javascript" src="imageloader.min.js"></script>
+<script type="text/javascript" src="stereoimage.js"></script>
+<script type="text/javascript">
+	var settings = {
+		'filename' : 'test-image.jps',
+		'canvas-id' : "myCanvas",
+		'stereoscopic-scale' : 0.45,
+		'flick-rate' : 280,
+		'default-display-type' : 2,
+		'default-draw-type' : 6
+		}
+	
+	var stereoImage = new StereoImage( settings );
+
+</script>
+
+</body>
+</html>
