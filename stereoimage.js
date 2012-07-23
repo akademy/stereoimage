@@ -27,7 +27,7 @@ By Matthew Wilcoxson
 
 Description:    Show JPS and PNS stereoscopic images inside a canvas. It can show the image in several different ways.
 Website:        http://www.akademy.co.uk/software/stereoimage/
-Version:        1.0.0.120307
+Version:        1.0.13.120724
 
 global ImageLoader, window  (for JSLint) 
 */
@@ -208,7 +208,8 @@ function StereoImage( settings ) {
         clear();
         
         var size = sizes( _display );
-        _ctx.drawImage(_imgBoth,0,0,_imgBoth.width, _imgBoth.height,0,0,size.w, size.h );
+        _ctx.drawImage(_imgBoth,0,0,_actualImageWidth,_actualImageHeight,0,0,size.w,size.h/2);
+        _ctx.drawImage(_imgBoth,_actualImageWidth,0,_actualImageWidth,_actualImageHeight,0,size.h/2,size.w,size.h/2);
     };
 
     this.bothVertical = function() {
@@ -216,8 +217,8 @@ function StereoImage( settings ) {
         clear();
 
         var size = sizes( _display );
-        _ctx.drawImage(_imgBoth,0,0,_actualImageWidth,_actualImageHeight,0,0,size.w,size.h/2);
-        _ctx.drawImage(_imgBoth,_actualImageWidth,0,_actualImageWidth,_actualImageHeight,0,size.h/2,size.w,size.h/2);
+        _ctx.drawImage(_imgBoth,0,0,_imgBoth.width, _imgBoth.height,0,0,size.w, size.h );
+        
     };
 
     this.left = function() {
